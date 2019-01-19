@@ -23,20 +23,27 @@
 
   <!-- Add your site or application content here -->
   <div id="canvas_div">
-    <canvas id="myCanvas" width="1920" height="1080"></canvas>
+    <canvas id="myCanvas">
+      <script>
+        var canvas = document.getElementById("myCanvas");
+        var parent = canvas.parentNode;
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
+      </script>
+    </canvas>
   </div>
   <div id="sidebar">
-    <button id="circle_button">Add Circle</button><br>
-    <button id="rectangle_button">Add Rectangle</button><br>
-    <button id="triangle_button">Add Triangle</button><br>
-    <button id="polygon_button">Add Custom Polygon</button><br>
+    <button id="circle_button" class="sidebar_button">Add Circle</button><br>
+    <button id="rectangle_button" class="sidebar_button">Add Rectangle</button><br>
+    <button id="triangle_button" class="sidebar_button">Add Triangle</button><br>
+    <button id="polygon_button" class="sidebar_button">Add Custom Polygon</button><br>
   </div>
   <div id="slider_div">
     <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
   </div>
   <div id="buttons">
-    <button id="pos_button">Set Position</button>
-    <button id="col_button">Set Color</button>
+    <button id="pos_button" class="button">Set Position</button>
+    <button id="col_button" class="button">Set Color</button>
   </div>
   <script src="js/vendor/modernizr-{{MODERNIZR_VERSION}}.min.js"></script>
   <script src="https://code.jquery.com/jquery-{{JQUERY_VERSION}}.min.js" integrity="{{JQUERY_SRI_HASH}}" crossorigin="anonymous"></script>
@@ -71,9 +78,10 @@
 
       var newX = slider.value * 10;
 
-      if (newX < canvas.width - myRectangle.width - myRectangle.borderWidth / 2) {
+
+      //if (newX < canvas.width - myRectangle.width - myRectangle.borderWidth / 2) {
         myRectangle.x = newX;
-      }
+      //}
 
       // clear
       context.clearRect(0, 0, canvas.width, canvas.height);
