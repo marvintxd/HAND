@@ -109,6 +109,12 @@ textarea {
   background-color: red;
 }
 
+#buttons {
+  height: auto;
+  width: auto;
+  background-color: blue;
+}
+
 
 
 
