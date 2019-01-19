@@ -22,23 +22,40 @@
   <![endif]-->
 
   <!-- Add your site or application content here -->
-  <div id="canvas_div">
-    <!-- <canvas id="myCanvas" width="1920" height="1080"></canvas> -->
+  <div id="canvas_div" style="height:500px; border-width:1px;">
     <svg width="960" height="500"></svg>
+
   </div>
   <div id="sidebar">
-    <button id="circle_button">Add Circle</button><br>
-    <button id="rectangle_button">Add Rectangle</button><br>
-    <button id="triangle_button">Add Triangle</button><br>
-    <button id="polygon_button">Add Custom Polygon</button><br>
+    <button id="circle_button" class="sidebar_button">Add Circle</button><br>
+    <button id="rectangle_button" class="sidebar_button">Add Rectangle</button><br>
+    <button id="triangle_button" class="sidebar_button">Add Triangle</button><br>
+    <button id="polygon_button" class="sidebar_button">Add Custom Polygon</button><br>
   </div>
   <div id="slider_div">
     <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
   </div>
-  <div id="buttons">
-    <button id="pos_button">Set Position</button>
-    <button id="col_button">Set Color</button>
+  <!-- <div id="buttons">
+    <button id="pos_button" class="button">Set Position</button>
+    <button id="col_button" class="button">Set Color</button>
+  </div> -->
+  <div id="attributes">
+    <table style="width:20%">
+    <tr>
+      <th>Attribute</th>
+      <th>Start Value</th> 
+      <th>End Value</th>
+      <th></th>
+    </tr>
+    <tr>
+      <td id="attribute_dropdown_area"></td>
+      <td><input type="text" id="startfield" value=""></td> 
+      <td><input type="text" id="endfield" value=""></td>
+      <td><button type="button" id="save_attribute_button">Save</td>
+    </tr>
   </div>
+
+
   <script src="js/vendor/modernizr-{{MODERNIZR_VERSION}}.min.js"></script>
   <script src="https://code.jquery.com/jquery-{{JQUERY_VERSION}}.min.js" integrity="{{JQUERY_SRI_HASH}}" crossorigin="anonymous"></script>
   <script>window.jQuery || document.write('<script src="js/vendor/jquery-{{JQUERY_VERSION}}.min.js"><\/script>')</script>
@@ -63,15 +80,10 @@
     var rectWidth = 30,
       rectHeight = 30;
 
-    // var circles = d3.range(20).map(function () {
-    //   return {
-    //     x: Math.round(Math.random() * (width - radius * 2) + radius),
-    //     y: Math.round(Math.random() * (height - radius * 2) + radius)
-    //   };
-    // });
-
     var circles = [];
     var rectangles = [];
+
+    var lastSelected; //last selected obj, to display properties below
 
     function addCircle() {
       circles.push({
@@ -99,6 +111,9 @@
     rectBtn.addEventListener("click", addRect);
 
     var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    var saveAttributeBtn = document.getElementById("save_attribute_button");
+    saveAttributeBtn.addEventListener("click", saveEndValue);
 
     function render() {
       svg.selectAll("circle")
@@ -131,16 +146,105 @@
 
     function dragstarted(d) {
       d3.select(this).raise().classed("active", true);
+      if (lastSelected != this) { //diff obj
+        lastSelected = this;
+        console.log("changed lastSelected to" + this);
+        deleteForm();
+        document.getElementById("startfield").value = "";
+        document.getElementById("endfield").value = "";
+        showAttributes(this);
+
+      }
     }
 
     function dragged(d) {
       d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-      console.log("mouse x: " + d3.event.x);
-      
+      // console.log("mouse x: " + d3.event.x
+      var myselect = document.getElementById("attribute_select");
+      console.log("myselect: " + myselect);
+      console.log(myselect.options);
+      for (var key in lastSelected.__data__) {
+        if (key == myselect.options[myselect.selectedIndex].text) {
+            updateAttributeFields(key);
+        }
+      }
+       
     }
 
     function dragended(d) {
       d3.select(this).classed("active", false);
+    }
+
+    function showAttributes(d) {
+      var attributeLocation=document.getElementById("attribute_dropdown_area");
+      var form=document.createElement("form");
+      form.setAttribute("id","attribute_form");
+      var myselect = document.createElement("select");
+      myselect.setAttribute("id", "attribute_select");
+      var myOnChange = function(e) { 
+        var selectedOption = myselect.options[myselect.selectedIndex].childNodes[0].nodeValue;
+        // location.href = selectedOption;
+        updateAttributeFields(selectedOption);
+        console.log(selectedOption);
+        };
+
+      theOption=document.createElement("OPTION");
+      theText=document.createTextNode("Select attribute");
+      theOption.appendChild(theText);
+      myselect.appendChild(theOption);
+      
+      for (var key in d.__data__) {
+        theOption=document.createElement("OPTION");
+        theText=document.createTextNode(key);
+        theOption.appendChild(theText);
+        theOption.setAttribute("value", d[key]);
+        myselect.appendChild(theOption);
+        console.log(theOption.childNodes[0].nodeValue); //get the text node, i.e. the key
+        //e.g. <h1> asdf </h1> --> asdf is the text node value
+        // console.log(theText);
+      }
+      form.appendChild(myselect);
+      attributeLocation.appendChild(form);
+      myselect.onchange=myOnChange;
+
+
+
+    }
+
+    function updateAttributeFields(key) {
+      console.log("value in obj: " + lastSelected.__data__[key]);
+      document.getElementById("startfield").value = lastSelected.__data__[key];
+      var key_endvalue = lastSelected.__data__[key + "_end"];
+      if (!isNaN(key_endvalue) && key_endvalue != undefined) {
+        document.getElementById("endfield").value = lastSelected.__data__[key + "_end"];
+      } else {
+        document.getElementById("endfield").value = "";
+      }
+    }
+
+
+    function deleteForm() {
+      attributeLocation=document.getElementById("attribute_dropdown_area");
+      console.log(attributeLocation);
+      console.log(attributeLocation.childNodes);
+      form=document.getElementById("attribute_form");
+      console.log(form);
+      // console.log(!form);
+      if (form) {
+        attributeLocation.removeChild(form);
+      }
+    }
+
+    function saveEndValue(e) {
+      var myselect = document.getElementById("attribute_select");
+      console.log("myselect: " + myselect);
+      console.log(myselect.options);
+      if (myselect.options[myselect.selectedIndex].value != 0) { //not the first dummy option
+          var key_text = myselect.options[myselect.selectedIndex].text;
+          lastSelected.__data__[key_text + "_end"] = parseInt(document.getElementById("endfield").value);
+      }
+      console.log(lastSelected);
+      console.log(lastSelected.__data__);
     }
 
     render();
@@ -208,4 +312,9 @@
     cursor: pointer;
     /* Cursor on hover */
   }
+
+  .active {
+    stroke: #000;
+    stroke-width: 2px;
+}
 </style>
