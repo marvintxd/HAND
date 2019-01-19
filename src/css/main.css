@@ -127,7 +127,7 @@ textarea {
 }
 
 body {
-  background-image: linear-gradient(lightgrey, grey);
+  background-image: linear-gradient(lightgrey, grey, lightgrey);
 }
 
 .sidebar_button {

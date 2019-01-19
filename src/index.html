@@ -34,7 +34,7 @@
     <button id="polygon_button" class="sidebar_button">Add Custom Polygon</button><br>
   </div>
   <div id="slider_div">
-    <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+    <input type="range" min="1" max="100" value="50" class="slider" id="myRange" oninput="sliderUpdate(this.value)">
   </div>
 
   <div id="attributes">
@@ -111,9 +111,10 @@
     var color = d3.scaleOrdinal(d3.schemeCategory10);
 
     var saveAttributeBtn = document.getElementById("save_attribute_button");
-    saveAttributeBtn.addEventListener("click", saveEndValue);
+    saveAttributeBtn.addEventListener("click", saveValue);
 
     function render() {
+      // console.log("rendering...");
       svg.selectAll("circle")
         .data(circles)
         .enter()
@@ -142,6 +143,32 @@
           .on("end", dragended));
     }
 
+    function rerender() {
+      // console.log("re-rendering...");
+      svg.selectAll("circle")
+        .data(circles)
+        .attr("cx", function (d) { return d.x; })
+        .attr("cy", function (d) { return d.y; })
+        .attr("r", function (d) { return d.r; })
+        .style("fill", function (d, i) { return color(i); })
+        .call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", circleDragged)
+          .on("end", dragended));
+
+      svg.selectAll("rect")
+        .data(rectangles)
+        .attr("x", function (d) { return d.x; })
+        .attr("y", function (d) { return d.y; })
+        .attr("width", function (d) { return d.w; })
+        .attr("height", function (d) { return d.h; })
+        .style("fill", function (d, i) { return color(i); })
+        .call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", rectDragged)
+          .on("end", dragended));
+    }
+
     function dragstarted(d) {
       d3.select(this).raise().classed("active", true);
       if (lastSelected != this) { //diff obj
@@ -151,7 +178,6 @@
         document.getElementById("startfield").value = "";
         document.getElementById("endfield").value = "";
         showAttributes(this);
-
       }
     }
 
@@ -160,8 +186,8 @@
 
       // console.log("mouse x: " + d3.event.x
       var myselect = document.getElementById("attribute_select");
-      console.log("myselect: " + myselect);
-      console.log(myselect.options);
+      // console.log("myselect: " + myselect);
+      // console.log(myselect.options);
       for (var key in lastSelected.__data__) {
         if (key == myselect.options[myselect.selectedIndex].text) {
             updateAttributeFields(key);
@@ -177,6 +203,40 @@
       d3.select(this).classed("active", false);
     }
 
+    function sliderUpdate(newValue) {
+      for (var i = 0; i < circles.length; i++) {
+        var c = circles[i];
+        console.log(c);
+        if (c.x_start !== undefined && c.x_end !== undefined) {
+          c.x = c.x_start + newValue * (c.x_end - c.x_start) / 100;  
+        }
+        if (c.y_start !== undefined && c.y_end !== undefined) {
+          c.y = c.y_start + newValue * (c.y_end - c.y_start) / 100;
+        }
+        if (c.r_start !== undefined && c.r_end !== undefined) {
+          c.r = c.r_start + newValue * (c.r_end - c.r_start) / 100;
+        }
+      }
+
+      for (var k = 0; k < rectangles.length; k++) {
+        var r = rectangles[k];
+        console.log(r);
+        if (r.x_start !== undefined && r.x_end !== undefined) {
+          r.x = r.x_start + newValue * (r.x_end - r.x_start) / 100;
+        }
+        if (r.y_start !== undefined && r.y_end !== undefined) {
+          r.y = r.y_start + newValue * (r.y_end - r.y_start) / 100;
+        }
+        if (r.w_start !== undefined && r.w_end !== undefined) {
+          r.w = r.w_start + newValue * (r.w_end - r.w_start) / 100;
+        }
+        if (r.h_start !== undefined && r.h_end !== undefined) {
+          r.h = r.h_start + newValue * (r.h_end - r.h_start) / 100;
+        }
+      }
+      rerender();
+    }
+
     function showAttributes(d) {
       var attributeLocation=document.getElementById("attribute_dropdown_area");
       var form=document.createElement("form");
@@ -187,7 +247,7 @@
         var selectedOption = myselect.options[myselect.selectedIndex].childNodes[0].nodeValue;
         // location.href = selectedOption;
         updateAttributeFields(selectedOption);
-        console.log(selectedOption);
+        // console.log(selectedOption);
         };
 
       theOption=document.createElement("OPTION");
@@ -208,13 +268,10 @@
       form.appendChild(myselect);
       attributeLocation.appendChild(form);
       myselect.onchange=myOnChange;
-
-
-
     }
 
     function updateAttributeFields(key) {
-      console.log("value in obj: " + lastSelected.__data__[key]);
+      // console.log("value in obj: " + lastSelected.__data__[key]);
       document.getElementById("startfield").value = lastSelected.__data__[key];
       var key_endvalue = lastSelected.__data__[key + "_end"];
       if (!isNaN(key_endvalue) && key_endvalue != undefined) {
@@ -227,27 +284,30 @@
 
     function deleteForm() {
       attributeLocation=document.getElementById("attribute_dropdown_area");
-      console.log(attributeLocation);
-      console.log(attributeLocation.childNodes);
+      // console.log(attributeLocation);
+      // console.log(attributeLocation.childNodes);
       form=document.getElementById("attribute_form");
-      console.log(form);
+      // console.log(form);
       // console.log(!form);
       if (form) {
         attributeLocation.removeChild(form);
       }
     }
 
-    function saveEndValue(e) {
+    function saveValue(e) {
       var myselect = document.getElementById("attribute_select");
-      console.log("myselect: " + myselect);
-      console.log(myselect.options);
-      if (myselect.options[myselect.selectedIndex].value != 0) { //not the first dummy option
-          var key_text = myselect.options[myselect.selectedIndex].text;
+      // console.log("myselect: " + myselect);
+      // console.log(myselect.options);
+      var selectedOption = myselect.options[myselect.selectedIndex];
+      if (selectedOption.value != 0) { //not the first dummy option
+          var key_text = selectedOption.text;
+          lastSelected.__data__[key_text + "_start"] = parseInt(document.getElementById("startfield").value);
           lastSelected.__data__[key_text + "_end"] = parseInt(document.getElementById("endfield").value);
       }
-      console.log(lastSelected);
-      console.log(lastSelected.__data__);
+      // console.log(lastSelected);
+      // console.log(lastSelected.__data__);
     }
+
 
     render();
 
@@ -270,7 +330,9 @@
     appearance: none;
     width: 100%;
     /* Full-width */
-    height: 25px;
+    height: 12px;
+    /* Border radius */
+    border-radius: 5px;
     /* Specified height */
     background: #d3d3d3;
     /* Grey background */
@@ -297,6 +359,8 @@
     width: 25px;
     /* Set a specific slider handle width */
     height: 25px;
+    /* Border radius */
+    border-radius: 50%;
     /* Slider handle height */
     background: #4CAF50;
     /* Green background */
@@ -308,6 +372,8 @@
     width: 25px;
     /* Set a specific slider handle width */
     height: 25px;
+    /* Border radius */
+    border-radius: 50%;
     /* Slider handle height */
     background: #4CAF50;
     /* Green background */
