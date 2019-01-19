@@ -91,28 +91,37 @@ textarea {
    ========================================================================== */
 #sidebar {
   height: 100%;
-  width: 100px;
+  width: 200px;
   position: fixed;
   z-index: 1; /* Stay on top */
   top: 0; /* Stay at the top */
-  left: 0;
+  right: 0;
   background-color: #111; /* Black */
   overflow-x: hidden; /* Disable horizontal scroll */
   padding-top: 20px;
 }
 
 #canvas_div {
-  height: 40%;
-  width: auto;
-  position: fixed;
-  bottom: 0;
-  background-color: red;
+  height: 300px;
+  width: 100%;
+  position: relative;
+  top: 0;
+  background-color: rgba(255, 0, 0, 0.33);
 }
 
 #buttons {
-  height: auto;
-  width: auto;
-  background-color: blue;
+  height: 250px;
+  width: 100%;
+  position: relative;
+  background-color: rgba(0, 0, 255, 0.2);
+  bottom: 0;
+}
+
+#slider_div {
+  height: 30px;
+  width: 100%;
+  position: relative;
+  background-color: rgba(255, 255, 0, 0.36);
 }
 
 
