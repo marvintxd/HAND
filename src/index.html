@@ -24,7 +24,7 @@
   <!-- Add your site or application content here -->
   <div id="canvas_div">
     <!-- <canvas id="myCanvas" width="1920" height="1080"></canvas> -->
-    <svg width="960" height="500"></svg>
+    <svg width="650" height="280"></svg>
   </div>
   <div id="sidebar">
     <button id="circle_button" class="sidebar_button">Add Circle</button><br>
@@ -111,7 +111,7 @@
         .style("fill", function (d, i) { return color(i); })
         .call(d3.drag()
           .on("start", dragstarted)
-          .on("drag", dragged)
+          .on("drag", circleDragged)
           .on("end", dragended));
 
       svg.selectAll("rect")
@@ -125,7 +125,7 @@
         .style("fill", function (d, i) { return color(i); })
         .call(d3.drag()
           .on("start", dragstarted)
-          .on("drag", dragged)
+          .on("drag", rectDragged)
           .on("end", dragended));
     }
 
@@ -133,10 +133,12 @@
       d3.select(this).raise().classed("active", true);
     }
 
-    function dragged(d) {
+    function circleDragged(d) {
       d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-      console.log("mouse x: " + d3.event.x);
-      
+    }
+
+    function rectDragged(d) {
+      d3.select(this).attr("x", d.x = d3.event.x).attr("y", d.y = d3.event.y);
     }
 
     function dragended(d) {
